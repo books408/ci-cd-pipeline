@@ -27,7 +27,7 @@ jobs:
         run: |
           aws deploy push \
             --application-name MyApp \
-            --s3-location s3://my-cicd-app-bucket/app.zip \
+            --s3-location s3://my-cicd-app-buckets/app.zip \
             --ignore-hidden-files \
             --region ${{ secrets.AWS_REGION }}
 
@@ -36,5 +36,5 @@ jobs:
           aws deploy create-deployment \
             --application-name MyApp \
             --deployment-group-name MyDeploymentGroup \
-            --s3-location bucket=my-cicd-app-bucket,key=app.zip,bundleType=zip \
+            --s3-location bucket=my-cicd-app-buckets,key=app.zip,bundleType=zip \
             --region ${{ secrets.AWS_REGION }}
