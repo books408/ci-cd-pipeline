@@ -1,0 +1,40 @@
+name: Deploy to EC2 via CodeDeploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Zip source files
+        run: zip -r app.zip . -x "*.git*"
+
+      - name: Push to S3
+        run: |
+          aws deploy push \
+            --application-name MyApp \
+            --s3-location s3://my-cicd-app-buckets/app.zip \
+            --ignore-hidden-files \
+            --region ${{ secrets.AWS_REGION }}
+
+      - name: Deploy via CodeDeploy
+        run: |
+          aws deploy create-deployment \
+            --application-name MyApp \
+            --deployment-group-name MyDeploymentGroup \
+            --s3-location bucket=my-cicd-app-buckets,key=app.zip,bundleType=zip \
+            --region ${{ secrets.AWS_REGION }}
